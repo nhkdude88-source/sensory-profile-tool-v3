@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rongo-mā-Tāne - Sensory Profile Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .whakatauki { font-style: italic; color: #e5e7eb; }
+        .mana-header { background-color: #4338ca; color: white; }
+        .section-title { color: #1f2937; border-bottom: 2px solid #d1d5db; padding-bottom: 0.5rem; }
+        
+        /* Navigation Tabs */
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 4px solid transparent;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #4b5563;
+        }
+        .tab-button.active {
+            color: #4338ca;
+            border-bottom-color: #4338ca;
+        }
+        .view { display: none; }
+        .view.active { display: block; }
+
+        /* Custom Checkbox Styles */
+        .custom-option {
+            display: block;
+            position: relative;
+            padding-left: 35px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        .custom-option input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 25px;
+            width: 25px;
+            background-color: #e5e7eb;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+        .custom-option:hover input ~ .checkmark { background-color: #d1d5db; }
+        .custom-option input:checked ~ .checkmark { background-color: #4f46e5; }
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+        .custom-option input:checked ~ .checkmark:after { display: block; }
+        .custom-option .checkmark:after {
+            left: 9px;
+            top: 5px;
+            width: 8px;
+            height: 13px;
+            border: solid white;
+            border-width: 0 3px 3px 0;
+            -webkit-transform: rotate(45deg);
+            -ms-transform: rotate(45deg);
+            transform: rotate(45deg);
+        }
+
+        /* Sliding Scale Styles */
+        .likert-scale {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .likert-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            flex-shrink: 0;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #d1d5db;
+            outline: none;
+            opacity: 0.9;
+            transition: opacity .2s;
+            border-radius: 9999px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: #4f46e5;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            background: #4f46e5;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+
+        /* Print Styles */
+        @media print {
+            body, html {
+                background-color: white;
+            }
+            body * {
+                visibility: hidden;
+            }
+            #plan-view, #plan-view * {
+                visibility: visible;
+            }
+            #plan-view {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                box-shadow: none;
+                border: none;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+
+        <!-- Header -->
+        <header class="flex flex-col sm:flex-row items-center justify-center p-6 rounded-lg mana-header shadow-lg mb-8 gap-6">
+            <img src="https://i.imgur.com/S17hbuh.png" class="h-32" alt="Rongo-mā-Tāne icon">
+            <div class="text-center sm:text-left">
+                <h1 class="text-4xl font-bold">Rongo-mā-Tāne</h1>
+                <h2 class="text-2xl font-semibold mt-1">Individual Sensory Profile</h2>
+                <p class="whakatauki mt-2 text-lg">“He Toka tū moana he akinga nā nga tai”</p>
+            </div>
+        </header>
+
+        <!-- Profile Details Section -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8 no-print">
+            <h3 class="text-2xl font-bold section-title mb-4">Ākonga Details</h3>
+            <div class="flex flex-col md:flex-row items-center gap-6">
+                <div class="flex-shrink-0">
+                    <img id="photo-preview-akonga" class="h-32 w-32 rounded-full object-cover bg-gray-200" src="https://placehold.co/128x128/e2e8f0/7c7f86?text=Photo" alt="Ākonga photo preview">
+                </div>
+                <div class="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                    <div>
+                        <label for="full-name" class="block text-sm font-medium text-gray-700">Full Name:</label>
+                        <input type="text" id="full-name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="dob" class="block text-sm font-medium text-gray-700">Date of Birth:</label>
+                        <input type="date" id="dob" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="photo-upload-akonga" class="block text-sm font-medium text-gray-700">Upload Photo:</label>
+                        <input type="file" id="photo-upload-akonga" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="bg-white rounded-lg shadow-md mb-8 flex flex-wrap justify-center no-print">
+            <button class="tab-button active" onclick="showView('akonga-view', this)">Ākonga (Student)</button>
+            <button class="tab-button" onclick="showView('whanau-view', this)">Whānau (Family)</button>
+            <button class="tab-button" onclick="showView('kaiako-view', this)">Kaiako (Teacher)</button>
+            <button class="tab-button" onclick="generatePlan(this)">Sensory Plan</button>
+        </nav>
+
+        <!-- Main Content -->
+        <main>
+            <!-- ĀKONGA VIEW -->
+            <div id="akonga-view" class="view active">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-2xl font-bold section-title mb-4">Kia ora! This is all about you.</h3>
+                    <p class="mb-6">Tell us what you like so we can make school a better place for you.</p>
+                    
+                    <div class="space-y-8">
+                        <div>
+                            <label class="block font-medium text-lg mb-2">What things do you love to do?</label>
+                            <textarea id="akonga-strengths" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="e.g., Playing games, drawing, building with LEGO..."></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block font-medium text-lg mb-3">How do you like the classroom to be?</label>
+                            <div class="space-y-4">
+                                <div>
+                                    <p class="font-semibold">Light</p>
+                                    <div class="likert-scale"><span class="likert-label">Dim</span><input type="range" id="akonga-light" min="1" max="5" value="3"><span class="likert-label">Bright</span></div>
+                                </div>
+                                <div>
+                                    <p class="font-semibold">Sound</p>
+                                    <div class="likert-scale"><span class="likert-label">Quiet</span><input type="range" id="akonga-sound" min="1" max="5" value="3"><span class="likert-label">Loud</span></div>
+                                </div>
+                                <div>
+                                    <p class="font-semibold">Temperature</p>
+                                    <div class="likert-scale"><span class="likert-label">Cool</span><input type="range" id="akonga-temp" min="1" max="5" value="3"><span class="likert-label">Warm</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block font-medium text-lg mb-3">What helps you learn best?</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                <label class="custom-option">Working by myself <input type="checkbox" name="akonga-learning" value="Working by myself"><span class="checkmark"></span></label>
+                                <label class="custom-option">Working with a friend <input type="checkbox" name="akonga-learning" value="Working with a friend"><span class="checkmark"></span></label>
+                                <label class="custom-option">In a small group <input type="checkbox" name="akonga-learning" value="In a small group"><span class="checkmark"></span></label>
+                                <label class="custom-option">Listening to the teacher <input type="checkbox" name="akonga-learning" value="Listening to the teacher"><span class="checkmark"></span></label>
+                                <label class="custom-option">Reading instructions <input type="checkbox" name="akonga-learning" value="Reading instructions"><span class="checkmark"></span></label>
+                                <label class="custom-option">Doing hands-on things <input type="checkbox" name="akonga-learning" value="Doing hands-on things"><span class="checkmark"></span></label>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block font-medium text-lg mb-3">How do you feel about...</label>
+                             <div class="space-y-4">
+                                <div>
+                                    <p class="font-semibold">School work</p>
+                                    <div class="likert-scale"><span class="likert-label">Boring</span><input type="range" id="akonga-happy-work" min="1" max="5" value="3"><span class="likert-label">Fun!</span></div>
+                                </div>
+                                <div>
+                                    <p class="font-semibold">Friends at school</p>
+                                    <div class="likert-scale"><span class="likert-label">Hard to be with</span><input type="range" id="akonga-happy-peers" min="1" max="5" value="3"><span class="likert-label">Great!</span></div>
+                                </div>
+                                <div>
+                                    <p class="font-semibold">Your teachers</p>
+                                    <div class="likert-scale"><span class="likert-label">Hard to talk to</span><input type="range" id="akonga-happy-teacher" min="1" max="5" value="3"><span class="likert-label">Helpful</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WHĀNAU VIEW -->
+            <div id="whanau-view" class="view">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex flex-col md:flex-row items-center gap-6 border-b pb-6 mb-6">
+                        <img id="photo-preview-whanau" class="h-24 w-24 rounded-full object-cover bg-gray-200" src="https://placehold.co/96x96/e2e8f0/7c7f86?text=Wh%C4%81nau" alt="Whānau photo preview">
+                        <div class="flex-grow w-full">
+                            <h3 class="text-2xl font-bold text-gray-800">Tēnā koutou, e te whānau</h3>
+                             <label for="photo-upload-whanau" class="block text-sm font-medium text-gray-700 mt-2">Upload your photo:</label>
+                            <input type="file" id="photo-upload-whanau" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-600 hover:file:bg-green-100">
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <label for="whanau-strengths" class="block font-medium">What are some of your whānau's strengths?</label>
+                            <textarea id="whanau-strengths" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
+                        </div>
+                        <div>
+                            <label for="whanau-hopes" class="block font-medium">What are your hopes for your mokopuna?</label>
+                            <textarea id="whanau-hopes" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block font-medium text-lg mb-3">Happiness Gauge (from your perspective)</label>
+                             <div class="space-y-4">
+                                <div>
+                                    <p class="font-semibold">Productivity/Happiness with school work</p>
+                                    <div class="likert-scale"><span class="likert-label">Low</span><input type="range" id="whanau-happy-work" min="1" max="5" value="3"><span class="likert-label">High</span></div>
+                                </div>
+                                <div>
+                                    <p class="font-semibold">Social interactions with peers</p>
+                                    <div class="likert-scale"><span class="likert-label">Low</span><input type="range" id="whanau-happy-peers" min="1" max="5" value="3"><span class="likert-label">High</span></div>
+                                </div>
+                                <div>
+                                    <p class="font-semibold">Relationship with teacher/s</p>
+                                    <div class="likert-scale"><span class="likert-label">Low</span><input type="range" id="whanau-happy-teacher" min="1" max="5" value="3"><span class="likert-label">High</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="whanau-sensitivities" class="block font-medium">Are there any specific sensory sensitivities you notice? (e.g., clothing textures, food smells, sounds)</label>
+                            <textarea id="whanau-sensitivities" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
+                        </div>
+                        <div>
+                            <label for="whanau-success-info" class="block font-medium">What is the most important thing for teachers to know to help your child succeed?</label>
+                            <textarea id="whanau-success-info" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- KAIAKO VIEW -->
+            <div id="kaiako-view" class="view">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                     <div class="flex flex-col md:flex-row items-center gap-6 border-b pb-6 mb-6">
+                        <img id="photo-preview-kaiako" class="h-24 w-24 rounded-full object-cover bg-gray-200" src="https://placehold.co/96x96/e2e8f0/7c7f86?text=Kaiako" alt="Kaiako photo preview">
+                        <div class="flex-grow w-full">
+                            <h3 class="text-2xl font-bold text-gray-800">Kaiako Section</h3>
+                             <label for="photo-upload-kaiako" class="block text-sm font-medium text-gray-700 mt-2">Upload your photo:</label>
+                            <input type="file" id="photo-upload-kaiako" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-600 hover:file:bg-purple-100">
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-6">
+                         <div>
+                            <label for="kaiako-strengths" class="block font-medium">What strengths do you bring as a kaiako?</label>
+                            <textarea id="kaiako-strengths" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
+                        </div>
+                         <div>
+                            <label for="kaiako-hopes" class="block font-medium">What are your hopes for this mokopuna?</label>
+                            <textarea id="kaiako-hopes" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
+                        </div>
+
+                        <div>
+                            <h4 class="font-medium text-lg">Sensory Environment Assessment</h4>
+                            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block font-medium">Light, Noise, and Temperature Observations:</label>
+                                    <textarea id="kaiako-lnt" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block font-medium">Proprioceptive & Kinesthetic Needs (Movement, Touch):</label>
+                                    <textarea id="kaiako-movement" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block font-medium text-lg mb-3">Happiness Gauge (Observed)</label>
+                             <div class="space-y-4">
+                                <div>
+                                    <p class="font-semibold">Productivity/Happiness with school work</p>
+                                    <div class="likert-scale"><span class="likert-label">Low</span><input type="range" id="kaiako-happy-work" min="1" max="5" value="3"><span class="likert-label">High</span></div>
+                                </div>
+                                <div>
+                                    <p class="font-semibold">Social interactions with peers</p>
+                                    <div class="likert-scale"><span class="likert-label">Low</span><input type="range" id="kaiako-happy-peers" min="1" max="5" value="3"><span class="likert-label">High</span></div>
+                                </div>
+                                <div>
+                                    <p class="font-semibold">Relationship with teacher/s</p>
+                                    <div class="likert-scale"><span class="likert-label">Low</span><input type="range" id="kaiako-happy-teacher" min="1" max="5" value="3"><span class="likert-label">High</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block font-medium">Proposed Strategies and Interventions:</label>
+                            <textarea id="kaiako-strategies" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SENSORY PLAN VIEW -->
+            <div id="plan-view" class="view">
+                <div class="bg-white p-8 rounded-lg shadow-md">
+                    <div id="plan-content" class="space-y-8">
+                        <!-- Content will be generated here by JavaScript -->
+                    </div>
+                    <div class="text-center mt-10 no-print">
+                        <button onclick="window.print()" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300">
+                            Save or Print Plan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- Global Variables ---
+        const views = document.querySelectorAll('.view');
+        const tabButtons = document.querySelectorAll('.tab-button');
+        
+        // --- Image Preview Logic ---
+        function setupPhotoUpload(uploadId, previewId) {
+            const uploadEl = document.getElementById(uploadId);
+            const previewEl = document.getElementById(previewId);
+            if(uploadEl && previewEl) {
+                uploadEl.addEventListener('change', event => {
+                    const file = event.target.files[0];
+                    if (file) {
+                        previewEl.src = URL.createObjectURL(file);
+                    }
+                });
+            }
+        }
+        setupPhotoUpload('photo-upload-akonga', 'photo-preview-akonga');
+        setupPhotoUpload('photo-upload-whanau', 'photo-preview-whanau');
+        setupPhotoUpload('photo-upload-kaiako', 'photo-preview-kaiako');
+
+
+        // --- Navigation Logic ---
+        function showView(viewId, clickedButton) {
+            views.forEach(view => view.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            tabButtons.forEach(button => button.classList.remove('active'));
+            if (clickedButton) clickedButton.classList.add('active');
+        }
+
+        // --- Plan Generation Logic ---
+        function generatePlan(clickedButton) {
+            showView('plan-view', clickedButton);
+            
+            const planContent = document.getElementById('plan-content');
+            
+            const getInputValue = (id) => {
+                const element = document.getElementById(id);
+                // Use .innerHTML to preserve line breaks from textareas
+                return element ? element.value.trim().replace(/\n/g, '<br>') : 'No input provided.';
+            };
+            const getSliderValue = (id) => document.getElementById(id)?.value || '3';
+            const getPhotoSrc = (id) => document.getElementById(id)?.src || '';
+            const getCheckboxValues = (name) => {
+                const checked = Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
+                return checked.length > 0 ? checked.join(', ') : 'None selected.';
+            };
+            
+            const data = {
+                profile: { name: getInputValue('full-name'), dob: getInputValue('dob'), photoSrc: getPhotoSrc('photo-preview-akonga') },
+                akonga: {
+                    strengths: getInputValue('akonga-strengths'),
+                    light: getSliderValue('akonga-light'),
+                    sound: getSliderValue('akonga-sound'),
+                    temp: getSliderValue('akonga-temp'),
+                    learning: getCheckboxValues('akonga-learning'),
+                    happyWork: getSliderValue('akonga-happy-work'),
+                    happyPeers: getSliderValue('akonga-happy-peers'),
+                    happyTeacher: getSliderValue('akonga-happy-teacher'),
+                },
+                whanau: {
+                    strengths: getInputValue('whanau-strengths'),
+                    hopes: getInputValue('whanau-hopes'),
+                    sensitivities: getInputValue('whanau-sensitivities'),
+                    successInfo: getInputValue('whanau-success-info'),
+                    photoSrc: getPhotoSrc('photo-preview-whanau'),
+                    happyWork: getSliderValue('whanau-happy-work'),
+                    happyPeers: getSliderValue('whanau-happy-peers'),
+                    happyTeacher: getSliderValue('whanau-happy-teacher'),
+                },
+                kaiako: {
+                    strengths: getInputValue('kaiako-strengths'),
+                    hopes: getInputValue('kaiako-hopes'),
+                    lnt: getInputValue('kaiako-lnt'),
+                    movement: getInputValue('kaiako-movement'),
+                    strategies: getInputValue('kaiako-strategies'),
+                    photoSrc: getPhotoSrc('photo-preview-kaiako'),
+                    happyWork: getSliderValue('kaiako-happy-work'),
+                    happyPeers: getSliderValue('kaiako-happy-peers'),
+                    happyTeacher: getSliderValue('kaiako-happy-teacher'),
+                }
+            };
+
+            planContent.innerHTML = `
+                <div class="text-center border-b-2 pb-6 mb-6">
+                    <img src="${data.profile.photoSrc}" class="h-40 w-40 rounded-full object-cover mx-auto mb-4 border-4 border-indigo-200 shadow-lg" alt="Ākonga photo">
+                    <h3 class="text-3xl font-bold text-gray-800">${data.profile.name || 'Ākonga Name'}</h3>
+                    <p class="text-md text-gray-600">Date of Birth: ${data.profile.dob || 'Not provided'}</p>
+                    <h2 class="text-2xl font-semibold mt-4 text-indigo-700">Combined Sensory Plan</h2>
+                </div>
+
+                <div class="p-6 border-l-4 border-blue-500 bg-blue-50 rounded-r-lg space-y-2">
+                    <h4 class="text-xl font-bold text-blue-800 mb-2">Voice of the Ākonga (Student)</h4>
+                    <p><strong>Things I love to do:</strong><br>${data.akonga.strengths}</p>
+                    <p><strong>My ideal classroom is:</strong> Light (${data.akonga.light}/5), Sound (${data.akonga.sound}/5), Temperature (${data.akonga.temp}/5).</p>
+                    <p><strong>I learn best by:</strong> ${data.akonga.learning}</p>
+                </div>
+
+                <div class="p-6 border-l-4 border-green-500 bg-green-50 rounded-r-lg">
+                    <div class="flex flex-col sm:flex-row gap-6">
+                        <img src="${data.whanau.photoSrc}" class="h-24 w-24 rounded-full object-cover flex-shrink-0" alt="Whānau photo">
+                        <div class="flex-grow space-y-2">
+                            <h4 class="text-xl font-bold text-green-800 mb-2">Whānau Perspective</h4>
+                            <p><strong>Our Whānau Strengths:</strong><br>${data.whanau.strengths}</p>
+                            <p><strong>Our Hopes for our Mokopuna:</strong><br>${data.whanau.hopes}</p>
+                            <p><strong>Observed Sensory Sensitivities:</strong><br>${data.whanau.sensitivities}</p>
+                            <p><strong>Key to Success:</strong><br>${data.whanau.successInfo}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-6 border-l-4 border-purple-500 bg-purple-50 rounded-r-lg">
+                     <div class="flex flex-col sm:flex-row gap-6">
+                        <img src="${data.kaiako.photoSrc}" class="h-24 w-24 rounded-full object-cover flex-shrink-0" alt="Kaiako photo">
+                        <div class="flex-grow space-y-2">
+                            <h4 class="text-xl font-bold text-purple-800 mb-2">Kaiako Perspective</h4>
+                            <p><strong>My Strengths as Kaiako:</strong><br>${data.kaiako.strengths}</p>
+                            <p><strong>My Hopes for this Mokopuna:</strong><br>${data.kaiako.hopes}</p>
+                            <p><strong>Environmental Observations:</strong><br>${data.kaiako.lnt}</p>
+                            <p><strong>Movement Needs:</strong><br>${data.kaiako.movement}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-8 pt-6 border-t-2 border-gray-300">
+                    <h4 class="text-2xl font-bold text-gray-800 mb-4 text-center">Happiness Gauge</h4>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white rounded-lg shadow">
+                           <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="py-3 px-4 text-left font-semibold text-gray-600">Area</th>
+                                    <th class="py-3 px-4 text-center font-semibold text-gray-600">Ākonga</th>
+                                    <th class="py-3 px-4 text-center font-semibold text-gray-600">Whānau</th>
+                                    <th class="py-3 px-4 text-center font-semibold text-gray-600">Kaiako</th>
+                                </tr>
+                           </thead>
+                           <tbody class="divide-y divide-gray-200">
+                                <tr>
+                                    <td class="py-3 px-4 font-medium">School Work</td>
+                                    <td class="py-3 px-4 text-center text-lg font-bold text-blue-600">${data.akonga.happyWork}</td>
+                                    <td class="py-3 px-4 text-center text-lg font-bold text-green-600">${data.whanau.happyWork}</td>
+                                    <td class="py-3 px-4 text-center text-lg font-bold text-purple-600">${data.kaiako.happyWork}</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 px-4 font-medium">Peers</td>
+                                    <td class="py-3 px-4 text-center text-lg font-bold text-blue-600">${data.akonga.happyPeers}</td>
+                                    <td class="py-3 px-4 text-center text-lg font-bold text-green-600">${data.whanau.happyPeers}</td>
+                                    <td class="py-3 px-4 text-center text-lg font-bold text-purple-600">${data.kaiako.happyPeers}</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 px-4 font-medium">Teachers</td>
+                                    <td class="py-3 px-4 text-center text-lg font-bold text-blue-600">${data.akonga.happyTeacher}</td>
+                                    <td class="py-3 px-4 text-center text-lg font-bold text-green-600">${data.whanau.happyTeacher}</td>
+                                    <td class="py-3 px-4 text-center text-lg font-bold text-purple-600">${data.kaiako.happyTeacher}</td>
+                                </tr>
+                           </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                 <div class="mt-8 pt-6 border-t-2 border-gray-300">
+                    <h4 class="text-2xl font-bold text-gray-800 mb-4 text-center">Summary of Strategies & Actions</h4>
+                    <div class="p-6 bg-yellow-50 border-2 border-yellow-300 rounded-lg">
+                        <p class="font-semibold text-yellow-800">Proposed strategies to ensure success:</p>
+                        <p>${data.kaiako.strategies}</p>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
+
