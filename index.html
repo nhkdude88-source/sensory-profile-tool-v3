@@ -1,0 +1,552 @@
+Images<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rongo-mā-Tāne - Sensory Profile Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .whakatauki { font-style: italic; color: #e5e7eb; }
+        .mana-header { background-color: #4338ca; color: white; }
+        .section-title { color: #1f2937; border-bottom: 2px solid #d1d5db; padding-bottom: 0.5rem; }
+        
+        /* Navigation Tabs */
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 4px solid transparent;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #4b5563;
+        }
+        .tab-button.active {
+            color: #4338ca;
+            border-bottom-color: #4338ca;
+        }
+        .view { display: none; }
+        .view.active { display: block; }
+ 
+        /* Custom Checkbox Styles */
+        .custom-option {
+            display: block;
+            position: relative;
+            padding-left: 35px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        .custom-option input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 25px;
+            width: 25px;
+            background-color: #e5e7eb;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+        .custom-option:hover input ~ .checkmark { background-color: #d1d5db; }
+        .custom-option input:checked ~ .checkmark { background-color: #4f46e5; }
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+        .custom-option input:checked ~ .checkmark:after { display: block; }
+        .custom-option .checkmark:after {
+            left: 9px;
+            top: 5px;
+            width: 8px;
+            height: 13px;
+            border: solid white;
+            border-width: 0 3px 3px 0;
+            -webkit-transform: rotate(45deg);
+            -ms-transform: rotate(45deg);
+            transform: rotate(45deg);
+        }
+ 
+        /* Sliding Scale Styles */
+        .likert-scale {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .likert-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            flex-shrink: 0;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #d1d5db;
+            outline: none;
+            opacity: 0.9;
+            transition: opacity .2s;
+            border-radius: 9999px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: #4f46e5;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            background: #4f46e5;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+ 
+ 
+        /* Print Styles */
+        @media print {
+            body, html {
+                background-color: white;
+            }
+            body * {
+                visibility: hidden;
+            }
+            #plan-view, #plan-view * {
+                visibility: visible;
+            }
+            #plan-view {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                box-shadow: none;
+                border: none;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+ 
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+ 
+        <!-- Header -->
+        <header class="text-center p-6 rounded-lg mana-header shadow-lg mb-8">
+             <div class="flex justify-center items-center mb-2">
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAgAElEQVR4nOy9a5clxZke9s+qrvfsu/c10zPTPePsc3sAwmGA4CagwEBAiZQsSyJlyY4sF7JlyT6Uf/B/f+S37K1clqRIgZgEg3E2DA+wh8czPXNNvXfXV/d9qvpHz8zMjI/ExqJESjJ19ap7z8xMvOJf+OI//MevQO/w80P8/O/x1/b//2f/n9f/y3/7P/3/AP/+h+v8+n9H/1//w38+H3LgT3nI8eU/+e27//l//6H/z0X55/+jD/3/H/f+3j/85v57oN+f+3P/y+mHh/zL+cE/+f3/84+f+3f/+X379s//5Ff9y/m388/8hP+af/6//5i9e+e//uT84f1/+s9/+5f333//3/+j/+l/P//6P/8//+n86/2X//5351/v//qf/53//x/+g//rP5z/2n/5X/9y/uf+1//pP/+8//o//5f//+R/93/+q/k//b//+f//1V//8f/8p/MX//Vf/jP5p/81/8l//uP/+t/8rfnf/0P/9H81/8A/3+L/+4P5x/97/9D/9X/lH/5//4/5D/93/8b+a/9r/7T//iX99//93/4H/7r+Wf/b//9//gX89//D/++P3yv/y3/wD/+S/nr/+X/9P/9R/Or//D/+3fzv/bf/2H/+r+X/7b//2L++/9V//T/lX+5/9p/+i//lP57/A//V//Z/P//qX/3v5xf9y/s//8i/n//a//q/l//p//sP/yP+Rf/9P/4b/8l/Of/w//lX88f/6f/u3/6T//3/71/Wv/9f/+t/PX/5T/+V8+5B8A8P3/e/6/+X/++//+H/mv/r//1P/y/89f/1/n/3L++/+V//t//mX81/+23/8p//X/+v/+T+cv/q/8h//i//s//b/55/8r/7v//V/Lf/rf/8v/Ov/7P/9v5y/8+uP9v/5//h/+8//8H/9P/8//2/+x/9F/+3/zn/93/9n/9z+cv/qf/4//xf/bf+5//Z//9/Of/1P/0//b/zD/8n/9//wH85//a//23/2L+cf/+P+Rf7b/+L/9X89//r//B/+D/8f/p//yv/xX85//N/9t//Jf/pv/4v/+v51/9r/7t/+g/nP/7X/5f/8R/Nf/m//m3+8/7//0//2v/4v5z/+P/9B/+Q/mf/wP/8/84vzL//Z//0//xf/s/81/Of/3//H/8P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//If/wAX/wDH/wCS/mX/APgf/wB//sf/AJD/+w//A3/APv/APj/+v/AOf/AOQ/+n/8AL/8Aw//g//kP/p//APB/nP8A+g//sP5L/APj/+S//AH/+y//AJf/AOf/AO//ANf/AN//ANf/AN//AH//AAP/APgf/wC//AOD/APg//AOf/AOg/+v/APn/APr/APgfzX/8v/4P/AO//APb/APb/APb/+y//Y//AOv/AM//APr/APr/AOf/APD/APj/AOS//w//APB/+n/8v/AJf/wH/7//APB/+n/8v/4//s//AJH/+f8A+v8A+3/8P/wCf/wDf/wDf/wDf/8Agf/4//h//wB//p//rf/ANv/APgf/wB//yv/AK/zj/8Al/+v85f/AJD/+n/+3/+H/wDA/mP/AOv86//w//AJf/wA//wP/wCP/wDA/+v/AN//AN//AJD/+n/+X/8Ag//AJf/APg//sP/ALH/AJf/wf/n/8n/8n/APb/APb/+H//APr/+S/8Aw//sP/yP/wCf/wCg/nP/APA/nX/+H/wCf/wCv/AJD/AOH/APj/APgf/wf/2P/wDH/wCv/wC3/wA//wAf/wAv/wCf/wCg//I//wP/wCf/wC//wA//wB//if/AOf/AOf/ANf/AMP/AOv85f8A+X8z//AJb/APb/+g//g/kv/wBv/sP/AIv/AN//AJD/+H/9v/w//APj/+Q/8A4H/9f/rf/wBf5x//D//AL//APr/ADv/APr/APf/APj/+n/Of/8A//AJD/+v/5//b/+y/+P/wCv/wDH/wC//wDf/wB//w//Yf/AJf/wBv/sf/ANP/AJD/+S/+//AJf/gf/wAX/wB//pfzL/+w//sP/g//AAP5T/APgf/yf/wCv/wB//tf/AJP/AOf/wCg/+y//tf/AOf/wCf/wCv86//h/+H/+P/+S//8n/8n/8Ah//AP8n/+v/APgf/AJD/APsP/kP/APW/8v5L/+3/+H//AL/+9//sP5z/APv/APv/APj/+g/+S//if/y//gf/AMf/AMP/AOS//r/+f/wB//y//AL//AMj/APgf/AOf/wA//wAX/wAf/wA//wD//8P/APgf/wA//AJf/AJD/APc//k//gf/wf/gf/AJf/2H/APr/APr/APr/APsP/2//yf/rf+S//w//APD/+v/APg//AJf/wAf/wP8x//8//AJf/wDA/nP/AOf/AO//AJD/+n/+3/+X/+S//tf/ALb/+X/8n/+3/wBv/yv/AJf/wBv/g//APB/nv/8P/8AA/mX/APb/APgf/wC3/wDH/wDA/n//APp/nX/8H/yH/wAv5r//r/Of/4v/AJD/APc/+p/nv/APf/AJD/+g/+S/+Q/+S//Yf/AMn/APb/+H/8v/AOf/APB/nP8A8n/9f84//if/AOQ/mX/8X/2P55//AL/+S//gf/p//gf/wDgf/4v/gf/ALn/AOf/wDH/8H//r/7b/AP//wDgfzX/APj/+3/63/8AL/8Av/8AI//If/g//Q//AMf/AMH/+H/8H/8Aj/+v86//l//AAP5x//r/+n/+Q/+v/5//7f/AJf/AMD/APgf/wOf/wAx/+P/7H88/wDgf/r/+X/+H/+v85//AMv/AJf/AJD/+P/yP/4v/w//AJf/rf+X/+v/4v/rf/AIf/AJD/+T/+v/4H/wCv84//AI//AJD/+n/+3/+X/wCS/wD2H/wC3/wC3/wCv85//AMP/AOD/AD//APgf/4//kv/8Ah/8Al/8AkP8A+//AJD/+3/+n/APX/wDH/wDQ//w//yf+R/wDz/+X/AOv/AOf/AOv/APj/+n/OX/8Ah//AJf/AJf/wDA/mX/AN//wA//wBf/8Av//f/2//w//sP/kP/p//APB/nP8A+g//sP5L/APj/+S//AH/+y//AJf/AOf/AO//ANf/AN//ANf/AN//AH//AAP/APgf/wC//AOD/APg//AOf/AOg/+v/APn/APr/APgfzX/8v/wP/AO//APb/APb/APb/+y//Y//AOv/AM//APr/APr/AOf/APD/APj/AOS//w//APB/+n/8v/AJf/wH/7//APB/+n/8v/4//s//AJH/+f8A+v8A+3/8P/wCf/wDf/wDf/wDf/8Agf/4//h//wB//p//rf/ANv/APgf/wB//yv/AK/zj/8Al/+v85f/AJD/+n/+3/+H/wDA/mP/AOv86//w//AJf/wA//wP/wCP/wDA/+v/AN//AN//AJD/+n/+X/8Ag//AJf/APg//sP/ALH/AJf/wf/n/8n/8n/APb/APb/+H//APr/+S/8Aw//sP/yP/wCf/wCg/nP/APA/nX/+H/wCf/wCv/AJD/+H/8Aj/APgf/wf/2P/wDH/wCv/wC3/wA//wAf/wAv/wCf/wCg//I//wP/wCf/wC//wA//wB//if/AOf/AOf/ANf/AMP/AOv85f8A+X8z//AJb/APb/+g//g/kv/wBv/sP/AIv/AN//AJD/+H/9v/w//APj/+Q/8A4H/9f/rf/wBf5x//D//AL//APr/ADv/APr/APf/APj/+n/Of/8A//AJD/+v/5//b/+y/+P/wCv/wDH/wC//wDf/wB//w//Yf/AJf/wBv/sf/ANP/AJD/+S/+//AJf/gf/wAX/wB//pfzL/+w//sP/g//AAP5T/APgf/yf/wCv/wB//tf/AJP/AOf/wCg/+y//tf/AOf/wOf/AJD/+H/8P/5H/APL/+S//AL//AJD/APg/mv8A/Y/+L/+S/wDxP/7b/7//AJD/+v/AOv/AN//AJD/+3/+2/+X/APg//AJD/+v/APg//I/nP/8AA/mP/wCf/wC//wDH/wDQ//s//AJf/g/wDyf/5//AJD/+g/mH/wDlf/sP/gf/yf/i/+//+D/APg//Ifzl/8Ab/8Ah/8Al/nP/wCH/AO//APp/+y//tf/2H/2n/AJf/wBf/sv5b/8Aw//p//l//g//AA/mX/wP/s//ALb/AOQ/+6/+w/mv/wBl/+H/APL/8An/8n/wB//y//w//gf/yv/wAf/g//ADP/AJD/APc/+w/nv/+X/4//j//g/+v/AP6/+//8H/8Ar+a/+2//AP//g/nH/w//tf/AMn/AOv/AOH/+P/AOv/AOf/AOQ//wP/AOv84/8Aj/8Aj/+v85//r/+H/wD4H81//j/+Q//AMf/AMH/+H/8v/4H85f/APD/+n/OX/8Al/8Av/8AL/8Aw//AL//AH/+v/APgf/wCf/wCg/kv/APn/APY//sP/AJD/APg/8y//g/mv/wBf/g/+9//ANf/ANv/APL/+S//AIv/AM//APgf/5f/gfzX/wD1/+n/APj/+g//AJf/ANf/ANv/AN//AN//AJf/APD/+S/+3/7f/pf/AMv/APb/+v/APg/+y/+v/APgf/wCv/wDh/wCv/wC//ANf/AN//APB/+v8A+//APL//wf/AAD//g//wDH/8j/8h//APB/nP8A/A/+v/APr/APv/APv/APj/+H/8n/9//p//AH/+n/APX/APr/+S//w//APD/APX/APg//AJf/wAf/wP8x//APD/+n/+/8x/+S//AJf/AMn/APsP/kP/AMX/ANn/APv/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" alt="Rongo-mā-Tāne icon" class="h-16 mr-4">
+                <h1 class="text-4xl font-bold">Rongo-mā-Tāne</h1>
+            </div>
+            <h2 class="text-2xl font-semibold mt-2">Individual Sensory Profile</h2>
+            <p class="whakatauki mt-4 text-lg">“He Toka tū moana he akinga nā nga tai”</p>
+        </header>
+ 
+        <!-- Profile Details Section -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8 no-print">
+            <h3 class="text-2xl font-bold section-title mb-4">Ākonga Details</h3>
+            <div class="flex flex-col md:flex-row items-center gap-6">
+                <div class="flex-shrink-0">
+                    <img id="photo-preview-akonga" class="h-32 w-32 rounded-full object-cover bg-gray-200" src="https://placehold.co/128x128/e2e8f0/7c7f86?text=Photo" alt="Ākonga photo preview">
+                </div>
+                <div class="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                    <div>
+                        <label for="full-name" class="block text-sm font-medium text-gray-700">Full Name:</label>
+                        <input type="text" id="full-name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="dob" class="block text-sm font-medium text-gray-700">Date of Birth:</label>
+                        <input type="date" id="dob" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="photo-upload-akonga" class="block text-sm font-medium text-gray-700">Upload Photo:</label>
+                        <input type="file" id="photo-upload-akonga" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100">
+                    </div>
+                </div>
+            </div>
+        </div>
+ 
+        <!-- Navigation -->
+        <nav class="bg-white rounded-lg shadow-md mb-8 flex justify-center no-print">
+            <button class="tab-button active" onclick="showView('akonga-view', this)">Ākonga (Student)</button>
+            <button class="tab-button" onclick="showView('whanau-view', this)">Whānau (Family)</button>
+            <button class="tab-button" onclick="showView('kaiako-view', this)">Kaiako (Teacher)</button>
+            <button class="tab-button" onclick="generatePlan(this)">Sensory Plan</button>
+        </nav>
+ 
+        <!-- Main Content -->
+        <main>
+            <!-- ĀKONGA VIEW -->
+            <div id="akonga-view" class="view active">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-2xl font-bold section-title mb-4">Kia ora! This is all about you.</h3>
+                    <p class="mb-6">Tell us what you like so we can make school a better place for you.</p>
+                    
+                    <div class="space-y-8">
+                        <div>
+                            <label class="block font-medium text-lg mb-2">What things do you love to do?</label>
+                            <textarea id="akonga-strengths" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="e.g., Playing games, drawing, building with LEGO..."></textarea>
+                        </div>
+ 
+                        <div>
+                            <label class="block font-medium text-lg mb-3">How do you like the classroom to be?</label>
+                            <div class="space-y-4">
+                                <div>
+                                    <p class="font-semibold">Light</p>
+                                    <div class="likert-scale"><span class="likert-label">Dim</span><input type="range" id="akonga-light" min="1" max="5" value="3"><span class="likert-label">Bright</span></div>
+                                </div>
+                                <div>
+                                    <p class="font-semibold">Sound</p>
+                                    <div class="likert-scale"><span class="likert-label">Quiet</span><input type="range" id="akonga-sound" min="1" max="5" value="3"><span class="likert-label">Loud</span></div>
+                                </div>
+                                <div>
+                                    <p class="font-semibold">Temperature</p>
+                                    <div class="likert-scale"><span class="likert-label">Cool</span><input type="range" id="akonga-temp" min="1" max="5" value="3"><span class="likert-label">Warm</span></div>
+                                </div>
+                            </div>
+                        </div>
+ 
+                        <div>
+                            <label class="block font-medium text-lg mb-3">What helps you learn best?</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                <label class="custom-option">Working by myself <input type="checkbox" name="akonga-learning" value="Working by myself"><span class="checkmark"></span></label>
+                                <label class="custom-option">Working with a friend <input type="checkbox" name="akonga-learning" value="Working with a friend"><span class="checkmark"></span></label>
+                                <label class="custom-option">In a small group <input type="checkbox" name="akonga-learning" value="In a small group"><span class="checkmark"></span></label>
+                                <label class="custom-option">Listening to the teacher <input type="checkbox" name="akonga-learning" value="Listening to the teacher"><span class="checkmark"></span></label>
+                                <label class="custom-option">Reading instructions <input type="checkbox" name="akonga-learning" value="Reading instructions"><span class="checkmark"></span></label>
+                                <label class="custom-option">Doing hands-on things <input type="checkbox" name="akonga-learning" value="Doing hands-on things"><span class="checkmark"></span></label>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block font-medium text-lg mb-3">How do you feel about...</label>
+                             <div class="space-y-4">
+                                <div>
+                                    <p class="font-semibold">School work</p>
+                                    <div class="likert-scale"><span class="likert-label">Boring</span><input type="range" id="akonga-happy-work" min="1" max="5" value="3"><span class="likert-label">Fun!</span></div>
+                                </div>
+                                <div>
+                                    <p class="font-semibold">Friends at school</p>
+                                    <div class="likert-scale"><span class="likert-label">Hard to be with</span><input type="range" id="akonga-happy-peers" min="1" max="5" value="3"><span class="likert-label">Great!</span></div>
+                                </div>
+                                <div>
+                                    <p class="font-semibold">Your teachers</p>
+                                    <div class="likert-scale"><span class="likert-label">Hard to talk to</span><input type="range" id="akonga-happy-teacher" min="1" max="5" value="3"><span class="likert-label">Helpful</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+ 
+            <!-- WHĀNAU VIEW -->
+            <div id="whanau-view" class="view">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex flex-col md:flex-row items-center gap-6 border-b pb-6 mb-6">
+                        <img id="photo-preview-whanau" class="h-24 w-24 rounded-full object-cover bg-gray-200" src="https://placehold.co/96x96/e2e8f0/7c7f86?text=Wh%C4%81nau" alt="Whānau photo preview">
+                        <div class="flex-grow w-full">
+                            <h3 class="text-2xl font-bold text-gray-800">Tēnā koutou, e te whānau</h3>
+                             <label for="photo-upload-whanau" class="block text-sm font-medium text-gray-700 mt-2">Upload your photo:</label>
+                            <input type="file" id="photo-upload-whanau" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-600 hover:file:bg-green-100">
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <label for="whanau-strengths" class="block font-medium text-lg mb-2">Our Whānau's Strengths</label>
+                            <textarea id="whanau-strengths" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="e.g., We are a supportive family, we love the outdoors..."></textarea>
+                        </div>
+                        <div>
+                           <label for="whanau-hopes" class="block font-medium text-lg mb-2">Our Hopes for our Mokopuna</label>
+                            <textarea id="whanau-hopes" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="e.g., We hope they feel happy and confident at school..."></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block font-medium text-lg mb-3">Happiness Gauge (from your perspective)</label>
+                             <div class="space-y-4">
+                                <div>
+                                    <p class="font-semibold">Productivity/Happiness with school work</p>
+                                    <div class="likert-scale"><span class="likert-label">Low</span><input type="range" id="whanau-happy-work" min="1" max="5" value="3"><span class="likert-label">High</span></div>
+                                </div>
+                                <div>
+                                    <p class="font-semibold">Social interactions with peers</p>
+                                    <div class="likert-scale"><span class="likert-label">Low</span><input type="range" id="whanau-happy-peers" min="1" max="5" value="3"><span class="likert-label">High</span></div>
+                                </div>
+                                <div>
+                                    <p class="font-semibold">Relationship with teacher/s</p>
+                                    <div class="likert-scale"><span class="likert-label">Low</span><input type="range" id="whanau-happy-teacher" min="1" max="5" value="3"><span class="likert-label">High</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+ 
+            <!-- KAIAKO VIEW -->
+            <div id="kaiako-view" class="view">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                     <div class="flex flex-col md:flex-row items-center gap-6 border-b pb-6 mb-6">
+                        <img id="photo-preview-kaiako" class="h-24 w-24 rounded-full object-cover bg-gray-200" src="https://placehold.co/96x96/e2e8f0/7c7f86?text=Kaiako" alt="Kaiako photo preview">
+                        <div class="flex-grow w-full">
+                            <h3 class="text-2xl font-bold text-gray-800">Kaiako Section</h3>
+                             <label for="photo-upload-kaiako" class="block text-sm font-medium text-gray-700 mt-2">Upload your photo:</label>
+                            <input type="file" id="photo-upload-kaiako" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-600 hover:file:bg-purple-100">
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-6">
+                         <div>
+                            <label for="kaiako-strengths" class="block font-medium text-lg mb-2">My Strengths as Kaiako</label>
+                            <textarea id="kaiako-strengths" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="e.g., I am patient, I create fun activities..."></textarea>
+                        </div>
+                         <div>
+                            <label for="kaiako-hopes" class="block font-medium text-lg mb-2">My Hopes for this Mokopuna</label>
+                            <textarea id="kaiako-hopes" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="e.g., I hope to see them build strong friendships..."></textarea>
+                        </div>
+ 
+                        <div>
+                            <h4 class="font-medium text-lg">Sensory Environment Assessment</h4>
+                            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block font-medium">Light, Noise, and Temperature Observations:</label>
+                                    <textarea id="kaiako-lnt" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block font-medium">Proprioceptive & Kinesthetic Needs (Movement, Touch):</label>
+                                    <textarea id="kaiako-movement" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block font-medium text-lg mb-3">Happiness Gauge (Observed)</label>
+                             <div class="space-y-4">
+                                <div>
+                                    <p class="font-semibold">Productivity/Happiness with school work</p>
+                                    <div class="likert-scale"><span class="likert-label">Low</span><input type="range" id="kaiako-happy-work" min="1" max="5" value="3"><span class="likert-label">High</span></div>
+                                </div>
+                                <div>
+                                    <p class="font-semibold">Social interactions with peers</p>
+                                    <div class="likert-scale"><span class="likert-label">Low</span><input type="range" id="kaiako-happy-peers" min="1" max="5" value="3"><span class="likert-label">High</span></div>
+                                </div>
+                                <div>
+                                    <p class="font-semibold">Relationship with teacher/s</p>
+                                    <div class="likert-scale"><span class="likert-label">Low</span><input type="range" id="kaiako-happy-teacher" min="1" max="5" value="3"><span class="likert-label">High</span></div>
+                                </div>
+                            </div>
+                        </div>
+ 
+                        <div>
+                            <label class="block font-medium">Proposed Strategies and Interventions:</label>
+                            <textarea id="kaiako-strategies" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+ 
+            <!-- SENSORY PLAN VIEW -->
+            <div id="plan-view" class="view">
+                <div class="bg-white p-8 rounded-lg shadow-md">
+                    <div id="plan-content" class="space-y-8">
+                        <!-- Content will be generated here by JavaScript -->
+                    </div>
+                    <div class="text-center mt-10 no-print">
+                        <button onclick="window.print()" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300">
+                            Save or Print Plan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+ 
+    <script>
+        // --- Global Variables ---
+        const views = document.querySelectorAll('.view');
+        const tabButtons = document.querySelectorAll('.tab-button');
+        
+        // --- Image Preview Logic ---
+        function setupPhotoUpload(uploadId, previewId) {
+            const uploadEl = document.getElementById(uploadId);
+            const previewEl = document.getElementById(previewId);
+            if(uploadEl && previewEl) {
+                uploadEl.addEventListener('change', event => {
+                    const file = event.target.files[0];
+                    if (file) {
+                        previewEl.src = URL.createObjectURL(file);
+                    }
+                });
+            }
+        }
+        setupPhotoUpload('photo-upload-akonga', 'photo-preview-akonga');
+        setupPhotoUpload('photo-upload-whanau', 'photo-preview-whanau');
+        setupPhotoUpload('photo-upload-kaiako', 'photo-preview-kaiako');
+ 
+ 
+        // --- Navigation Logic ---
+        function showView(viewId, clickedButton) {
+            views.forEach(view => view.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            tabButtons.forEach(button => button.classList.remove('active'));
+            if (clickedButton) clickedButton.classList.add('active');
+        }
+ 
+        // --- Plan Generation Logic ---
+        function generatePlan(clickedButton) {
+            showView('plan-view', clickedButton);
+            
+            const planContent = document.getElementById('plan-content');
+            
+            const getInputValue = (id) => document.getElementById(id)?.value.trim() || 'No input provided.';
+            const getSliderValue = (id) => document.getElementById(id)?.value || '3';
+            const getPhotoSrc = (id) => document.getElementById(id)?.src || '';
+            const getCheckboxValues = (name) => {
+                const checked = Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
+                return checked.length > 0 ? checked.join(', ') : 'None selected.';
+            };
+            
+            const data = {
+                profile: { name: getInputValue('full-name'), dob: getInputValue('dob'), photoSrc: getPhotoSrc('photo-preview-akonga') },
+                akonga: {
+                    strengths: getInputValue('akonga-strengths'),
+                    light: getSliderValue('akonga-light'),
+                    sound: getSliderValue('akonga-sound'),
+                    temp: getSliderValue('akonga-temp'),
+                    learning: getCheckboxValues('akonga-learning'),
+                    happyWork: getSliderValue('akonga-happy-work'),
+                    happyPeers: getSliderValue('akonga-happy-peers'),
+                    happyTeacher: getSliderValue('akonga-happy-teacher'),
+                },
+                whanau: {
+                    strengths: getInputValue('whanau-strengths'),
+                    hopes: getInputValue('whanau-hopes'),
+                    photoSrc: getPhotoSrc('photo-preview-whanau'),
+                    happyWork: getSliderValue('whanau-happy-work'),
+                    happyPeers: getSliderValue('whanau-happy-peers'),
+                    happyTeacher: getSliderValue('whanau-happy-teacher'),
+                },
+                kaiako: {
+                    strengths: getInputValue('kaiako-strengths'),
+                    hopes: getInputValue('kaiako-hopes'),
+                    lnt: getInputValue('kaiako-lnt'),
+                    movement: getInputValue('kaiako-movement'),
+                    strategies: getInputValue('kaiako-strategies'),
+                    photoSrc: getPhotoSrc('photo-preview-kaiako'),
+                    happyWork: getSliderValue('kaiako-happy-work'),
+                    happyPeers: getSliderValue('kaiako-happy-peers'),
+                    happyTeacher: getSliderValue('kaiako-happy-teacher'),
+                }
+            };
+ 
+            planContent.innerHTML = `
+                <div class="text-center border-b-2 pb-6 mb-6">
+                    <img src="${data.profile.photoSrc}" class="h-40 w-40 rounded-full object-cover mx-auto mb-4 border-4 border-indigo-200 shadow-lg" alt="Ākonga photo">
+                    <h3 class="text-3xl font-bold text-gray-800">${data.profile.name || 'Ākonga Name'}</h3>
+                    <p class="text-md text-gray-600">Date of Birth: ${data.profile.dob || 'Not provided'}</p>
+                    <h2 class="text-2xl font-semibold mt-4 text-indigo-700">Combined Sensory Plan</h2>
+                </div>
+ 
+                <div class="p-6 border-l-4 border-blue-500 bg-blue-50 rounded-r-lg">
+                    <h4 class="text-xl font-bold text-blue-800 mb-3">Voice of the Ākonga (Student)</h4>
+                    <p><strong>Things I love to do:</strong> ${data.akonga.strengths}</p>
+                    <p><strong>My ideal classroom is:</strong> Light (${data.akonga.light}/5), Sound (${data.akonga.sound}/5), Temperature (${data.akonga.temp}/5).</p>
+                    <p><strong>I learn best by:</strong> ${data.akonga.learning}</p>
+                </div>
+ 
+                <div class="p-6 border-l-4 border-green-500 bg-green-50 rounded-r-lg">
+                    <div class="flex flex-col sm:flex-row gap-6 items-center">
+                        <img src="${data.whanau.photoSrc}" class="h-24 w-24 rounded-full object-cover flex-shrink-0" alt="Whānau photo">
+                        <div class="flex-grow">
+                            <h4 class="text-xl font-bold text-green-800 mb-3">Whānau Perspective</h4>
+                            <p><strong>Our Whānau Strengths:</strong> ${data.whanau.strengths}</p>
+                            <p><strong>Our Hopes for our Mokopuna:</strong> ${data.whanau.hopes}</p>
+                        </div>
+                    </div>
+                </div>
+ 
+                <div class="p-6 border-l-4 border-purple-500 bg-purple-50 rounded-r-lg">
+                     <div class="flex flex-col sm:flex-row gap-6 items-center">
+                        <img src="${data.kaiako.photoSrc}" class="h-24 w-24 rounded-full object-cover flex-shrink-0" alt="Kaiako photo">
+                        <div class="flex-grow">
+                            <h4 class="text-xl font-bold text-purple-800 mb-3">Kaiako Perspective</h4>
+                            <p><strong>My Strengths as Kaiako:</strong> ${data.kaiako.strengths}</p>
+                            <p><strong>My Hopes for this Mokopuna:</strong> ${data.kaiako.hopes}</p>
+                            <p><strong>Environmental Observations:</strong> ${data.kaiako.lnt}</p>
+                            <p><strong>Movement Needs:</strong> ${data.kaiako.movement}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-8 pt-6 border-t-2 border-gray-300">
+                    <h4 class="text-2xl font-bold text-gray-800 mb-4 text-center">Happiness Gauge</h4>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white rounded-lg shadow">
+                           <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="py-3 px-4 text-left font-semibold text-gray-600">Area</th>
+                                    <th class="py-3 px-4 text-center font-semibold text-gray-600">Ākonga</th>
+                                    <th class="py-3 px-4 text-center font-semibold text-gray-600">Whānau</th>
+                                    <th class="py-3 px-4 text-center font-semibold text-gray-600">Kaiako</th>
+                                </tr>
+                           </thead>
+                           <tbody class="divide-y divide-gray-200">
+                                <tr>
+                                    <td class="py-3 px-4 font-medium">School Work</td>
+                                    <td class="py-3 px-4 text-center text-lg font-bold text-blue-600">${data.akonga.happyWork}</td>
+                                    <td class="py-3 px-4 text-center text-lg font-bold text-green-600">${data.whanau.happyWork}</td>
+                                    <td class="py-3 px-4 text-center text-lg font-bold text-purple-600">${data.kaiako.happyWork}</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 px-4 font-medium">Peers</td>
+                                    <td class="py-3 px-4 text-center text-lg font-bold text-blue-600">${data.akonga.happyPeers}</td>
+                                    <td class="py-3 px-4 text-center text-lg font-bold text-green-600">${data.whanau.happyPeers}</td>
+                                    <td class="py-3 px-4 text-center text-lg font-bold text-purple-600">${data.kaiako.happyPeers}</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 px-4 font-medium">Teachers</td>
+                                    <td class="py-3 px-4 text-center text-lg font-bold text-blue-600">${data.akonga.happyTeacher}</td>
+                                    <td class="py-3 px-4 text-center text-lg font-bold text-green-600">${data.whanau.happyTeacher}</td>
+                                    <td class="py-3 px-4 text-center text-lg font-bold text-purple-600">${data.kaiako.happyTeacher}</td>
+                                </tr>
+                           </tbody>
+                        </table>
+                    </div>
+                </div>
+ 
+                 <div class="mt-8 pt-6 border-t-2 border-gray-300">
+                    <h4 class="text-2xl font-bold text-gray-800 mb-4 text-center">Summary of Strategies & Actions</h4>
+                    <div class="p-6 bg-yellow-50 border-2 border-yellow-300 rounded-lg">
+                        <p class="font-semibold text-yellow-800">Proposed strategies to ensure success:</p>
+                        <p>${data.kaiako.strategies}</p>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
+```eof
+ 
